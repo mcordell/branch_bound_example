@@ -16,20 +16,6 @@ def enumerate_possible(current_branch,working_set)
   return possible_combos
 end
 
-def get_size(array_in)
-  size=0
-  array_in.each do |arr|
-    if arr == "X"
-      size+=1
-    elsif arr == "Y"
-      size+=2
-    else
-      size+=1
-    end
-  end
-  return size
-end
-
 @requirement_size=90
 @requirement_power_a=250
 @requirement_power_b=200
