@@ -57,38 +57,9 @@ def get_total_score(score_hash)
     positives == 0 ? score=negatives : score=positives
 end
 
-#Pick the requirement to fill next. Requirements will be picked based on their
-#order in the requirements_of_interest array. The next unfilled requirement is
-#the requirement to fill.
-def get_requirement_to_fill(score_hash)
-  @requirements_of_interest.each do |requirement|
-    if score_hash[requirement] > 0
-      last=requirement
-      return requirement
-    end
-  end
-  return nil
-end
-
-
-def find_best_for_requirement(requirement,size_constraint)
-  current_max=0
-  best_for_requirement=nil
-  @possible_widgets.each do |widget|
-    w_value=widget.send(requirement)
-    if w_value > current_max and widget.size < size_constraint
-      best_for_requirement=widget
-      current_max=w_value
-    end
-  end
-  return best_for_requirement
-end
-
-def pick_best_widget_to_fill(current_array)
-  score_hash=get_score_hash(current_array)
-  next_requirement_to_fill=get_requirement_to_fill(score_hash)
-end
-
+#Determines if the first provided score is better than the second provided
+#score. If it is a 1 is returned, if not a -1, if they are equal a 0 is
+#returned.
 def score_is_better(first,second)
   if first == second
     return 0
@@ -101,6 +72,10 @@ def score_is_better(first,second)
   end
 end
 
+#Given a widget_array first calculate it's score, and add it as a branch in the
+#list of branches based on the quality of it's score. Better scores are first.
+#Branches that do not meet the size requirement are not added to the branches
+#array. This effectively kills that branch.
 def add_branch(widget_array,branches)
   score_hash=get_score_hash widget_array
   score=get_total_score score_hash
@@ -119,6 +94,13 @@ def add_branch(widget_array,branches)
     end
   end
 end
+
+#Branch and bound recursive search. Provided an in array which represents the
+#node which will be branched off of. Roughly, the function first creates a list
+#of potential branches which are ordered by the quality of their score.
+#Potential branches are then looped through, if a potential branch is viable the
+#function is called again with it as the root node. This continues until
+#exhaustion of all possiblities.
 
 def branch_and_bound(in_array)
   branches=[]
@@ -150,9 +132,7 @@ def branch_and_bound(in_array)
   end
 end
 
-
-
-
+### Environment setup and benchmarking of algorithm 
 
 @requirement_power_a=250
 @requirement_power_b=200
@@ -166,7 +146,7 @@ widget_z=Widget.new("Z",20, 100, 150, 50)
 @all_widgets=[widget_x,widget_y,widget_z]
 
 
-
+##Run branch and bound with a smaller search size, 90
 @requirement_size=90
 @best_solution=[[widget_y]]
 @best_solution_score=get_total_score(get_score_hash(@best_solution[0]))
@@ -179,6 +159,7 @@ time=Benchmark.bm(7) { |x|
 
 @best_solution.each { |solution| print_widget_array solution}
 
+##Run branch and bound with a smaller search size, 400
 @requirement_size=400
 @best_solution=[[widget_y]]
 @best_solution_score=get_total_score(get_score_hash(@best_solution[0]))
