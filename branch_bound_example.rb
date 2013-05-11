@@ -1,8 +1,7 @@
 require './widget'
 require './requirements'
+require 'benchmark'
 
-@incumbent_match=0
-@incumbent_match_score=0
 
 #Print out the widgets that make up an array
 def print_widget_array(widget_array)
@@ -72,7 +71,6 @@ def get_requirement_to_fill(score_hash)
 end
 
 
-
 def find_best_for_requirement(requirement,size_constraint)
   current_max=0
   best_for_requirement=nil
@@ -84,10 +82,110 @@ def find_best_for_requirement(requirement,size_constraint)
     end
   end
   return best_for_requirement
-
 end
 
 def pick_best_widget_to_fill(current_array)
   score_hash=get_score_hash(current_array)
   next_requirement_to_fill=get_requirement_to_fill(score_hash)
 end
+
+def score_is_better(first,second)
+  if first == second
+    return 0
+  elsif second > 0 and second > first
+    return 1
+  elsif second <= 0 and first <=0 and first > second
+    return 1
+  else
+    return -1
+  end
+end
+
+def add_branch(widget_array,branches)
+  score_hash=get_score_hash widget_array
+  score=get_total_score score_hash
+  added=false
+  branches_index=0
+  if score_hash[:size] >= 0 
+    while not added and branches_index < branches.length do
+      if score_is_better(score,branches[branches_index][1]) >= 0
+          branches.insert(branches_index,[score_hash,score,widget_array])
+          added=true
+      end
+      branches_index+=1
+    end
+    if not added
+      branches.push([score_hash,score,widget_array])
+    end
+  end
+end
+
+def branch_and_bound(in_array)
+  branches=[]
+  @all_widgets.each do |widget|
+    branch_array=in_array+[widget]
+    add_branch(branch_array,branches)  
+  end
+  
+  branches.each do |branch|
+    score_hash=branch[0]
+    score=branch[1]
+    widget_array=branch[2]
+    score_comparison=score_is_better(score,@best_solution_score)
+    if score_comparison == 0 
+      @best_solution.push(widget_array)
+      continue_branch_investigation=true
+    elsif score_comparison == 1
+      @best_solution=[widget_array]
+      @best_solution_score=score
+      continue_branch_investigation=true
+    else
+      if score > 0 
+        continue_branch_investigation=true
+      end
+    end
+    if continue_branch_investigation
+      branch_and_bound(widget_array)
+    end
+  end
+end
+
+
+
+
+
+@requirement_power_a=250
+@requirement_power_b=200
+@requirement_power_c=100
+@requirements_of_interest=[:power_a,:power_b,:power_c]
+
+widget_x=Widget.new("X",15, 90, 20, 80)
+widget_y=Widget.new("Y",10, 70, 50, 10)
+widget_z=Widget.new("Z",20, 100, 150, 50)
+
+@all_widgets=[widget_x,widget_y,widget_z]
+
+
+
+@requirement_size=90
+@best_solution=[[widget_y]]
+@best_solution_score=get_total_score(get_score_hash(@best_solution[0]))
+time=Benchmark.bm(7) { |x|
+  x.report("b&b[90]:"){
+    branch_and_bound([])
+  }
+
+}
+
+@best_solution.each { |solution| print_widget_array solution}
+
+@requirement_size=400
+@best_solution=[[widget_y]]
+@best_solution_score=get_total_score(get_score_hash(@best_solution[0]))
+time=Benchmark.bm(7) { |x|
+  x.report("b&b[400]:"){
+    branch_and_bound([])
+  }
+
+}
+@best_solution.each { |solution| print_widget_array solution}
