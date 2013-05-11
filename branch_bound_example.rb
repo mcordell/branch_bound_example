@@ -159,7 +159,7 @@ time=Benchmark.bm(7) { |x|
 
 @best_solution.each { |solution| print_widget_array solution}
 
-##Run branch and bound with a smaller search size, 400
+##Run branch and bound with a larger search size, 400
 @requirement_size=400
 @best_solution=[[widget_y]]
 @best_solution_score=get_total_score(get_score_hash(@best_solution[0]))
