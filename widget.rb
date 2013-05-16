@@ -8,6 +8,9 @@ class Widget
     @power_b=power_b
     @power_c=power_c
   end
-    
+
+  def to_s
+     @name
+  end
 end
 
