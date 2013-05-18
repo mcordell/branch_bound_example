@@ -15,7 +15,7 @@ class BruteSearch
       score_hash = @scorer.get_score_hash(added_array)
       total_score = @scorer.get_total_score(score_hash)
       if score_hash[@main_requirement] >= 0
-        if @scorer.get_better_score(total_score, @best_score) == 1
+        if @scorer.get_better_score(total_score, @best_score) == :first
           @best_score = total_score
           @best_combo = added_array
         end

@@ -1,6 +1,5 @@
 #  encoding: utf-8
 require_relative 'widget'
-require_relative 'requirements'
 require 'benchmark'
 
 class BranchBoundSearch
@@ -24,7 +23,8 @@ class BranchBoundSearch
     branches_index = 0
     if score_hash[@main_requirement_label] >= 0
       while !added && branches_index < branches.length do
-        if @scorer.get_better_score(score, branches[branches_index][1]) >= 0
+        better_value=@scorer.get_better_score(score, branches[branches_index][1])
+        if  better_value == :equal || better_value == :first
             branches.insert(branches_index, [score_hash, score, widget_array])
             added = true
         end
@@ -51,10 +51,10 @@ class BranchBoundSearch
       score = branch[1]
       widget_array = branch[2]
       score_comparison = @scorer.get_better_score(score, @best_score)
-      if score_comparison == 0
+      if score_comparison == :equal
         @best_combos.push(widget_array)
         continue_branch_investigation = true
-      elsif score_comparison == 1
+      elsif score_comparison == :first
         @best_combos = [widget_array]
         @best_score = score
         continue_branch_investigation = true

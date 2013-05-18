@@ -44,17 +44,17 @@ class Scorer
 
   def get_better_score(first, second)
     if first.nil?
-      return -1
+      return :second
     elsif second.nil?
-      return 1
+      return :first
     elsif first == second
-      return 0
+      return :equal
     elsif second > 0 and second > first
-      return 1
+      return :first 
     elsif second <= 0 and first <= 0 and first > second
-      return 1
+      return :first 
     else
-      return -1
+      return :second
     end
   end
 end
